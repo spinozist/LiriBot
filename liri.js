@@ -1,17 +1,6 @@
 require("dotenv").config();
 
-// require("jsdom").env("", function(err, window) {
-//     if (err) {
-//         console.error(err);
-//         return;
-//     }
-
-//     var $ = require("jquery")(window);
-// });
-
-// var express = require(`express`);
-
-// var app = express();
+var fs = require(`fs`);
 
 var keys = require(`./keys`);
 
@@ -19,28 +8,40 @@ var request = require(`request`)
 
 var Spotify = require('node-spotify-api');
 
+var moment = require(`moment`);
+
 var spotify = new Spotify(keys.spotify);
 
-
-
-var searchInput = process.argv[3];
+var searchInput = process.argv.slice(3).join(" ");
 
 var action = process.argv[2];
 
+//Done
 var concertSearch = function () {
     console.log(`Searching Concerts for ${searchInput}`);
 
-    request('https://rest.bandsintown.com/artists/nicki%20minaj/events?app_id=codingbootcamp', function (error, response, body) {
+    request(`https://rest.bandsintown.com/artists/${searchInput}/events?app_id=codingbootcamp`, function (error, response, body) {
         console.log('error:', error);
-        console.log('statusCode:', response && response.statusCode); 
+        console.log('statusCode:', response && response.statusCode);
         // console.log('body:', JSON.parse(body,"/"));
-        var body = JSON.parse(body);
-        body.forEach (e => {
-            console.log(e.venue.name);
-        })
+        if (!error || response.statusCode === 200) {
+            var body = JSON.parse(body);
+            body.forEach(e => {
+                console.log(`\n********`)
+                console.log(e.venue.name);
+                console.log(`${e.venue.city}, ${e.venue.country}`);
+                console.log(moment(e.datetime).format("MM/DD/YYYY @ ha"));
+                console.log(`********\n`);
+
+            })
+        } else {
+            console.log(error);
+        }
+
     });
 };
 
+//Done
 var spotifySearch = function () {
     console.log(`Searching Spotify for ${searchInput}`);
     spotify.search({
@@ -55,37 +56,73 @@ var spotifySearch = function () {
         console.log(response.tracks.items[0].external_urls.spotify);
         console.log(response.tracks.items[0].album.name);
         console.log(`******\n`);
-        // console.log(response.tracks.items[0]);
-        // console.log(response.tracks.href)
-        // console.log(JSON.stringify(response, null, 2));
     }).catch(function (err) {
         console.log(err);
     });
 };
 
+//Done
 var movieSearch = function () {
-    console.log(`Movie search for ${searchInput}`);
+    console.log(`Searchig OMDB for ${searchInput}`);
+    request(`http://www.omdbapi.com/?apikey=trilogy&t=${searchInput}`, function (error, response, body) {
+        console.log('error:', error);
+        console.log('statusCode:', response && response.statusCode);
+        // console.log('body:', JSON.parse(body,"/"));
+        if (!error || response.statusCode === 200) {
+            var body = JSON.parse(body);
+            console.log(`\n********`)
+            console.log(body.Title);
+            console.log(body.Year);
+            console.log(`${body.Ratings[0].Value} on IMDB`);
+            console.log(`Produced in ${body.Country}`);
+            console.log(body.Language);
+            console.log(body.Plot);
+            console.log(body.Actors);
+            console.log(`********\n`)
+        } else {
+            console.log(error);
+        }
+
+    });
 };
 
 var doItSearch = function () {
     console.log(`${searchInput}`);
+    fs.readFile(`random.txt`, `utf8`, function (err, data) {
+        if (err) {
+            console.log(err);
+        } else {
+            var textArray = data.split(",");
+            console.log(textArray);
+            console.log(textArray[0]);
+            console.log(textArray[1]);
+            var action = textArray[0];
+            searchInput = textArray[1];
+            chooseAction(action);
+
+        }
+    });
 };
 
-switch (action) {
-    case `concert-this`:
-        concertSearch();
-        break;
+function chooseAction(action) {
+    switch (action) {
+        case `concert-this`:
+            concertSearch();
+            break;
 
-    case `spotify-this-song`:
-        spotifySearch();
-        break;
+        case `spotify-this-song`:
+            spotifySearch();
+            break;
 
-    case `movie-this`:
-        movieSearch();
-        break;
+        case `movie-this`:
+            movieSearch();
+            break;
 
-    case `do-what-it-says`:
-        doItSearch();
-        break;
+        case `do-what-it-says`:
+            doItSearch();
+            break;
 
-};
+    };
+}; 
+
+chooseAction(action);
