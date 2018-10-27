@@ -37,7 +37,6 @@ function concertSearch() {
                 console.log(`${e.venue.city}, ${e.venue.country}`);
                 console.log(moment(e.datetime).format("MM/DD/YYYY @ ha"));
                 console.log(`********\n`);
-
             })
         } else {
             console.log(error);
@@ -49,6 +48,7 @@ function concertSearch() {
 
 function spotifySearch() {
     console.log(`Searching Spotify for ${searchInput}`);
+    
     spotify.search({
         available_markets: 'US',
         limit: 1,
@@ -69,11 +69,10 @@ function spotifySearch() {
 //Movie Search
 
 function movieSearch() {
-    console.log(`Searchig OMDB for ${searchInput}`);
+    console.log(`Searching OMDB for ${searchInput}`);
+
     request(`http://www.omdbapi.com/?apikey=trilogy&t=${searchInput}`, function (error, response, body) {
-        console.log('error:', error);
-        console.log('statusCode:', response && response.statusCode);
-        // console.log('body:', JSON.parse(body,"/"));
+
         if (!error || response.statusCode === 200) {
             var body = JSON.parse(body);
             console.log(`\n********`)
@@ -94,15 +93,13 @@ function movieSearch() {
 //Do It Search
 
 function doItSearch() {
-    console.log(`${searchInput}`);
+
     fs.readFile(`random.txt`, `utf8`, function (err, data) {
+
         if (err) {
             console.log(err);
         } else {
             var textArray = data.split(",");
-            console.log(textArray);
-            console.log(textArray[0]);
-            console.log(textArray[1]);
             var action = textArray[0];
             searchInput = textArray[1];
             chooseAction(action);
@@ -113,7 +110,9 @@ function doItSearch() {
 //Choose Action
 
 function chooseAction(action) {
+
     switch (action) {
+
         case `concert-this`:
             concertSearch();
             break;
@@ -130,6 +129,6 @@ function chooseAction(action) {
             doItSearch();
             break;
     };
-}; 
+};
 
 chooseAction(action);
