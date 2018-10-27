@@ -1,5 +1,7 @@
 require("dotenv").config();
 
+//Require definitions
+
 var fs = require(`fs`);
 
 var keys = require(`./keys`);
@@ -10,14 +12,17 @@ var Spotify = require('node-spotify-api');
 
 var moment = require(`moment`);
 
-var spotify = new Spotify(keys.spotify);
+//Inputs definitions
 
-var searchInput = process.argv.slice(3).join(" ");
+var spotify = new Spotify(keys.spotify);
 
 var action = process.argv[2];
 
-//Done
-var concertSearch = function () {
+var searchInput = process.argv.slice(3).join(" ");
+
+//Concert Search
+
+function concertSearch() {
     console.log(`Searching Concerts for ${searchInput}`);
 
     request(`https://rest.bandsintown.com/artists/${searchInput}/events?app_id=codingbootcamp`, function (error, response, body) {
@@ -37,12 +42,12 @@ var concertSearch = function () {
         } else {
             console.log(error);
         }
-
     });
 };
 
-//Done
-var spotifySearch = function () {
+//Spotify Search
+
+function spotifySearch() {
     console.log(`Searching Spotify for ${searchInput}`);
     spotify.search({
         available_markets: 'US',
@@ -61,8 +66,9 @@ var spotifySearch = function () {
     });
 };
 
-//Done
-var movieSearch = function () {
+//Movie Search
+
+function movieSearch() {
     console.log(`Searchig OMDB for ${searchInput}`);
     request(`http://www.omdbapi.com/?apikey=trilogy&t=${searchInput}`, function (error, response, body) {
         console.log('error:', error);
@@ -82,11 +88,12 @@ var movieSearch = function () {
         } else {
             console.log(error);
         }
-
     });
 };
 
-var doItSearch = function () {
+//Do It Search
+
+function doItSearch() {
     console.log(`${searchInput}`);
     fs.readFile(`random.txt`, `utf8`, function (err, data) {
         if (err) {
@@ -99,10 +106,11 @@ var doItSearch = function () {
             var action = textArray[0];
             searchInput = textArray[1];
             chooseAction(action);
-
         }
     });
 };
+
+//Choose Action
 
 function chooseAction(action) {
     switch (action) {
@@ -121,7 +129,6 @@ function chooseAction(action) {
         case `do-what-it-says`:
             doItSearch();
             break;
-
     };
 }; 
 
